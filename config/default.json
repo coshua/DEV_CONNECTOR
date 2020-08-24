@@ -1,0 +1,4 @@
+{
+  "mongoURI": "mongodb+srv://dongju:ehdwn@devconnector.dymxs.mongodb.net/data?retryWrites=true&w=majority",
+  "jwtSecret": "secrettoken"
+}
