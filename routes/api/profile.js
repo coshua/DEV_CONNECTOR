@@ -7,6 +7,7 @@ const { check, validationResult } = require("express-validator");
 
 const Profile = require("../../models/Profile");
 const User = require("../../models/User");
+const Post = require("../../models/Post");
 const { json } = require("express");
 const { reset } = require("nodemon");
 
@@ -88,7 +89,6 @@ router.post(
         { $set: profileFields },
         { new: true, upsert: true }
       );
-      console.log(profileFields);
       res.json(profile);
     } catch (err) {
       console.error(err.message);
@@ -114,7 +114,7 @@ router.get("/", async (req, res) => {
   }
 });
 // GET api/profile/user/:user_id
-// Get all profiles
+// Get profile by Id
 // Public
 router.get("/user/:user_id", async (req, res) => {
   try {
@@ -136,7 +136,8 @@ router.get("/user/:user_id", async (req, res) => {
 // Private
 router.delete("/", auth, async (req, res) => {
   try {
-    //Remove profile
+    await Post.deleteMany({ user: req.user.id });
+
     await Profile.findOneAndRemove({ user: req.user.id });
 
     await User.findOneAndRemove({ _id: req.user.id });
