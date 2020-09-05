@@ -1,0 +1,6 @@
+{
+  "mongoURI": "mongodb+srv://dongju:ehdwn@devconnector.dymxs.mongodb.net/data?retryWrites=true&w=majority",
+  "jwtSecret": "secrettoken",
+  "githubClientId": "a38f083ea692f8344906",
+  "githubSecret": "39f2dbb2ba269d45e425c453bbf45d35c69684dd"
+}
