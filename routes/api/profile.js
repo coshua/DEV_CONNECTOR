@@ -4,7 +4,6 @@ const config = require("config");
 const router = express.Router();
 const auth = require("../../middleware/auth");
 const { check, validationResult } = require("express-validator");
-const normalize = require("normalize-url");
 
 const Profile = require("../../models/Profile");
 const User = require("../../models/User");
@@ -68,10 +67,7 @@ router.post(
       user: req.user.id,
       company,
       location,
-      website:
-        website && website !== ""
-          ? normalize(website, { forceHttps: true })
-          : "",
+      website: website && website !== "" ? website : "",
       bio,
       status,
       skills: Array.isArray(skills)
