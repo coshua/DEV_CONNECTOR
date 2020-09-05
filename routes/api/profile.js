@@ -4,6 +4,7 @@ const config = require("config");
 const router = express.Router();
 const auth = require("../../middleware/auth");
 const { check, validationResult } = require("express-validator");
+const normalize = require("normalize-url");
 
 const Profile = require("../../models/Profile");
 const User = require("../../models/User");
@@ -23,7 +24,6 @@ router.get("/me", auth, async (req, res) => {
     if (!profile) {
       return res.status(400).json({ msg: "There is no profile for this user" });
     }
-
     res.json(profile);
   } catch (err) {
     console.error(err.message);
@@ -64,30 +64,36 @@ router.post(
     } = req.body;
 
     //Build profile object
-    const profileFields = {};
-    profileFields.user = req.user.id;
-    if (company) profileFields.company = company;
-    if (website) profileFields.website = website;
-    if (location) profileFields.location = location;
-    if (bio) profileFields.bio = bio;
-    if (status) profileFields.status = status;
-    if (githubusername) profileFields.githubusername = githubusername;
-    if (skills) {
-      profileFields.skills = skills.split(",").map((skill) => skill.trim());
-    }
+    const profileFields = {
+      user: req.user.id,
+      company,
+      location,
+      website:
+        website && website !== ""
+          ? normalize(website, { forceHttps: true })
+          : "",
+      bio,
+      status,
+      skills: Array.isArray(skills)
+        ? skills
+        : skills.split(",").map((skill) => " " + skill.trim()),
+      githubusername,
+    };
+
     //Build social object
-    profileFields.social = {};
-    if (youtube) profileFields.social.youtube = youtube;
-    if (twitter) profileFields.social.youtube = twitter;
-    if (facebook) profileFields.social.youtube = facebook;
-    if (linkedin) profileFields.social.youtube = linkedin;
-    if (instagram) profileFields.social.youtube = instagram;
+    const socialfields = { youtube, twitter, facebook, linkedin, instagram };
+
+    for (const [key, value] of Object.entries(socialfields)) {
+      if (value && value.length > 0)
+        socialfields[key] = normalize(value, { forceHttps: true });
+    }
+    profileFields.social = socialfields;
 
     try {
       let profile = await Profile.findOneAndUpdate(
         { user: req.user.id },
         { $set: profileFields },
-        { new: true, upsert: true }
+        { new: true, upsert: true, setDefaultsOnInsert: true }
       );
       res.json(profile);
     } catch (err) {
